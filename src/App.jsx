@@ -5,7 +5,7 @@ const App = () => {
   const [text, setText] = useState("");
 
   return (
-    <div className="flex flex-col gap-10 items-center justify-center h-screen">
+    <div className="flex flex-col bg-[#12100b] gap-10 items-center justify-center h-screen">
       <h1 className="font-bold text-4xl text-white">
         Text to Speech Converter
       </h1>

@@ -5,16 +5,19 @@ const TextToSpeech = ({ text }) => {
   const [utterance, setUtterance] = useState(null);
   const [voice, setVoice] = useState(null);
   const [pitch, setPitch] = useState(1);
-  const [rate, setRate] = useState(1);
-  const [volume, setVolume] = useState(1);
+  const [rate, setRate] = useState(1.5);
+  const [volume, setVolume] = useState(4);
 
   useEffect(() => {
     const synth = window.speechSynthesis;
     const u = new SpeechSynthesisUtterance(text);
     const voices = synth.getVoices();
 
+    // Find the Malayalam voice
+    const malayalamVoice = voices.find(voice => voice.lang === 'ml-IN'); // 'ml-IN' is the language code for Malayalam
+
     setUtterance(u);
-    setVoice(voices[0]);
+    setVoice(malayalamVoice || voices[0]); // Fallback to the first voice if Malayalam is not available
 
     return () => {
       synth.cancel();
@@ -69,6 +72,7 @@ const TextToSpeech = ({ text }) => {
   const handleVolumeChange = (event) => {
     setVolume(parseFloat(event.target.value));
   };
+
   return (
     <div className="w-[70%] text-white">
       <div>
