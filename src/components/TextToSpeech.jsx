@@ -6,131 +6,136 @@ const TextToSpeech = ({ text }) => {
   const [voice, setVoice] = useState(null);
   const [pitch, setPitch] = useState(1);
   const [rate, setRate] = useState(1.5);
-  const [volume, setVolume] = useState(4);
+  const [volume, setVolume] = useState(1); // Adjusted volume to be between 0 and 1
 
-  useEffect(() => {
-    const synth = window.speechSynthesis;
-    const u = new SpeechSynthesisUtterance(text);
-    const voices = synth.getVoices();
+  
+useEffect(() => {
+  const synth = window.speechSynthesis;
+  const u = new SpeechSynthesisUtterance(text);
+  const voices = synth.getVoices();
 
-    // Find the Malayalam voice
-    const malayalamVoice = voices.find(voice => voice.lang === 'ml-IN'); // 'ml-IN' is the language code for Malayalam
+  // Filter for Malayalam and British English voices
+  const filteredVoices = voices.filter(voice => 
+    voice.lang === 'ml-IN' || voice.lang === 'en-GB'
+  );
 
-    setUtterance(u);
-    setVoice(malayalamVoice || voices[0]); // Fallback to the first voice if Malayalam is not available
+  // Set the utterance and default voice
+  setUtterance(u);
+  setVoice(filteredVoices[0]); // Default to the first filtered voice
 
-    return () => {
-      synth.cancel();
-    };
-  }, [text]);
-
-  const handlePlay = () => {
-    const synth = window.speechSynthesis;
-
-    if (isPaused) {
-      synth.resume();
-    } else {
-      utterance.voice = voice;
-      utterance.pitch = pitch;
-      utterance.rate = rate;
-      utterance.volume = volume;
-      synth.speak(utterance);
-    }
-
-    setIsPaused(false);
-  };
-
-  const handlePause = () => {
-    const synth = window.speechSynthesis;
-
-    synth.pause();
-
-    setIsPaused(true);
-  };
-
-  const handleStop = () => {
-    const synth = window.speechSynthesis;
-
+  return () => {
     synth.cancel();
-
-    setIsPaused(false);
   };
+}, [text]);
 
-  const handleVoiceChange = (event) => {
-    const voices = window.speechSynthesis.getVoices();
-    setVoice(voices.find((v) => v.name === event.target.value));
-  };
+const handlePlay = () => {
+  const synth = window.speechSynthesis;
 
-  const handlePitchChange = (event) => {
-    setPitch(parseFloat(event.target.value));
-  };
+  if (isPaused) {
+    synth.resume();
+  } else {
+    utterance.voice = voice;
+    utterance.pitch = pitch;
+    utterance.rate = rate;
+    utterance.volume = volume;
+    synth.speak(utterance);
+  }
 
-  const handleRateChange = (event) => {
-    setRate(parseFloat(event.target.value));
-  };
+  setIsPaused(false);
+};
 
-  const handleVolumeChange = (event) => {
-    setVolume(parseFloat(event.target.value));
-  };
+const handlePause = () => {
+  const synth = window.speechSynthesis;
+  synth.pause();
+  setIsPaused(true);
+};
 
-  return (
-    <div className="w-[70%] text-white">
-      <div>
-        <label htmlFor="voices" className="block mb-2 text-lg font-medium">
-          Select a Voice:
-        </label>
-        <select
-          id="voices"
-          className="bg-white border border-gray-300 text-md rounded-lg block w-full p-2.5 text-black"
-          value={voice?.name}
-          onChange={handleVoiceChange}
-        >
-          {window.speechSynthesis.getVoices().map((voice) => (
-            <option key={voice.name} value={voice.name}>
-              {voice.name}
-            </option>
-          ))}
-        </select>
-      </div>
+const handleStop = () => {
+  const synth = window.speechSynthesis;
+  synth.cancel();
+  setIsPaused(false);
+};
 
-      <div className="flex gap-10 mt-6">
-        <label className="text-md font-medium">
-          Pitch:
-          <input
-            type="range"
-            min="0.5"
-            max="2"
-            step="0.1"
-            className="w-full h-2 bg-white-200 rounded-lg appearance-none cursor-pointer"
-            value={pitch}
-            onChange={handlePitchChange}
-          />
-        </label>
-        <label className="text-md font-medium">
-          Speed:
-          <input
-            type="range"
-            min="0.5"
-            max="2"
-            step="0.1"
-            className="w-full h-2 bg-white-200 rounded-lg appearance-none cursor-pointer"
-            value={rate}
-            onChange={handleRateChange}
-          />
-        </label>
-        <label className="text-md font-medium">
-          Volume:
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.1"
-            className="w-full h-2 bg-white-200 rounded-lg appearance-none cursor-pointer"
-            value={volume}
-            onChange={handleVolumeChange}
-          />
-        </label>
-      </div>
+const handleVoiceChange = (event) => {
+  const voices = window.speechSynthesis.getVoices();
+  setVoice(voices.find((v) => v.name === event.target.value));
+};
+
+const handlePitchChange = (event) => {
+  setPitch(parseFloat(event.target.value));
+};
+
+const handleRateChange = (event) => {
+  setRate(parseFloat(event.target.value));
+};
+
+const handleVolumeChange = (event) => {
+  setVolume(parseFloat(event.target.value));
+};
+
+// Get the filtered voices for dropdown
+const filteredVoices = window.speechSynthesis.getVoices().filter(voice => 
+  voice.lang === 'ml-IN' || voice.lang === 'en-GB'
+);
+
+return (
+  <div className="w-[70%] text-white">
+    <div>
+      <label htmlFor="voices" className="block mb-2 text-lg font-medium">
+        Select a Voice:
+      </label>
+      <select
+        id="voices"
+        className="bg-white border border-gray-300 text-md rounded-lg block w-full p-2.5 text-black"
+        value={voice?.name}
+        onChange={handleVoiceChange}
+      >
+        {filteredVoices.map((voice) => (
+          <option key={voice.name} value={voice.name}>
+            {voice.name}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    <div className="flex gap-10 mt-6">
+      <label className="text-md font-medium">
+        Pitch:
+        <input
+          type="range"
+          min="0.5"
+          max="2"
+          step="0.1"
+          className="w-full h-2 bg-white-200 rounded-lg appearance-none cursor-pointer"
+          value={pitch}
+          onChange={handlePitchChange}
+        />
+      </label>
+      <label className="text-md font-medium">
+        Speed:
+        <input
+          type="range"
+          min="0.5"
+          max="2"
+          step="0.1"
+          className="w-full h-2 bg-white-200 rounded-lg appearance-none cursor-pointer"
+          value={rate}
+          onChange={handleRateChange}
+        />
+      </label>
+      <label className="text-md font-medium">
+        Volume:
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.1"
+          className="w-full h-2 bg-white-200 rounded-lg appearance-none cursor-pointer"
+          value={volume}
+          onChange={handleVolumeChange}
+        />
+      </label>
+    </div>
 
       <div className="flex gap-4 mt-6 items-center justify-center">
         <button
